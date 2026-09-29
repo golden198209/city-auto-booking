@@ -219,14 +219,14 @@
                 <div class="form-group">
                     <label>Pickup Point (Current Location)</label>
                     <div class="input-row">
-                        <input type="text" id="pickupLoc" placeholder="Use GPS button for live pin">
+                        <input type="text" id="pickupLoc" placeholder="Type landmark or use GPS">
                         <button class="btn-gps" onclick="getPickupGPS()" title="Get Pickup GPS">📍</button>
                     </div>
                 </div>
                 <div class="form-group">
                     <label>Destination Drop Point</label>
                     <div class="input-row">
-                        <input type="text" id="dropLoc" placeholder="Use GPS button for drop pin">
+                        <input type="text" id="dropLoc" placeholder="Type drop landmark or use GPS">
                         <button class="btn-gps" onclick="getDropGPS()" title="Get Drop GPS">📍</button>
                     </div>
                 </div>
@@ -290,7 +290,7 @@
             }
         }
 
-        // Get Pickup GPS
+        // Get Pickup GPS Location
         function getPickupGPS() {
             if (navigator.geolocation) {
                 document.getElementById('pickupLoc').value = "Detecting pickup GPS...";
@@ -312,7 +312,7 @@
             }
         }
 
-        // Get Drop GPS
+        // Get Drop GPS Location
         function getDropGPS() {
             if (navigator.geolocation) {
                 document.getElementById('dropLoc').value = "Detecting drop GPS...";
@@ -340,7 +340,7 @@
             const phone = document.getElementById('custPhone').value;
 
             if(!pickup || !drop || !phone) {
-                alert("Please fill all details and location pins");
+                alert("Please fill all details (Pickup, Drop, and Phone)");
                 return;
             }
 
@@ -367,7 +367,7 @@
             const statusCard = document.getElementById('customerStatusCard');
             statusCard.classList.remove('hidden');
             document.getElementById('statusTitle').innerText = "Finding Nearby Auto...";
-            document.getElementById('statusDesc').innerText = `Distance: ~${estimatedKm} km | Fare: ₹${calculatedFare} (0% Commission).`;
+            document.getElementById('statusDesc').innerText = `Drop: ${drop} | Fare: ₹${calculatedFare} (0% Commission).`;
             document.getElementById('customerDriverContact').classList.add('hidden');
 
             alert("Ride request sent successfully!");
@@ -394,15 +394,19 @@
                 return;
             }
 
-            // Navigation Buttons for Pickup and Drop
             let mapsButtonsHtml = '';
             if (ride.pickupLat && ride.pickupLon) {
                 const pickupMapsUrl = `https://www.google.com/maps/search/?api=1&query=${ride.pickupLat},${ride.pickupLon}`;
                 mapsButtonsHtml += `<a href="${pickupMapsUrl}" target="_blank" class="btn-action btn-maps">📍 1. Navigate to Pickup</a>`;
+            } else {
+                mapsButtonsHtml += `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ride.pickup)}" target="_blank" class="btn-action btn-maps">📍 1. Pickup: ${ride.pickup}</a>`;
             }
+
             if (ride.dropLat && ride.dropLon) {
                 const dropMapsUrl = `https://www.google.com/maps/search/?api=1&query=${ride.dropLat},${ride.dropLon}`;
                 mapsButtonsHtml += `<a href="${dropMapsUrl}" target="_blank" class="btn-action btn-drop-maps">🏁 2. Navigate to Drop Point</a>`;
+            } else {
+                mapsButtonsHtml += `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ride.drop)}" target="_blank" class="btn-action btn-drop-maps">🏁 2. Drop: ${ride.drop}</a>`;
             }
 
             feed.innerHTML = `
@@ -447,7 +451,7 @@
             if(ride.status === 'Accepted') {
                 statusCard.classList.remove('hidden');
                 document.getElementById('statusTitle').innerText = "Auto Confirmed! 🛺";
-                document.getElementById('statusDesc').innerText = `Driver is on the way. Fare: ₹${ride.fare}`;
+                document.getElementById('statusDesc').innerText = `Driver is on the way to pickup. Drop: ${ride.drop}`;
                 
                 contactDiv.classList.remove('hidden');
                 contactDiv.innerHTML = `
