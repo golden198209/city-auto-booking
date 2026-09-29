@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yatri Auto - GPS Navigation</title>
+    <title>Yatri Auto - Dual GPS Navigation</title>
     <style>
         :root {
             --primary: #f59e0b;
@@ -195,6 +195,9 @@
         .btn-maps {
             background-color: #ea580c;
         }
+        .btn-drop-maps {
+            background-color: #7c3aed;
+        }
     </style>
 </head>
 <body>
@@ -202,7 +205,7 @@
     <div class="app-container">
         <div class="app-header">
             <h1>🛺 Yatri Auto</h1>
-            <p>Zero Commission • GPS Live Navigation</p>
+            <p>Zero Commission • Dual GPS Navigation</p>
         </div>
 
         <div class="nav-tabs">
@@ -214,15 +217,18 @@
             <!-- CUSTOMER VIEW -->
             <div id="customerView">
                 <div class="form-group">
-                    <label>Pickup Point</label>
+                    <label>Pickup Point (Current Location)</label>
                     <div class="input-row">
-                        <input type="text" id="pickupLoc" placeholder="Type landmark or use GPS">
-                        <button class="btn-gps" onclick="getGPSLocation()" title="Detect Current GPS Location">📍</button>
+                        <input type="text" id="pickupLoc" placeholder="Use GPS button for live pin">
+                        <button class="btn-gps" onclick="getPickupGPS()" title="Get Pickup GPS">📍</button>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Destination Drop</label>
-                    <input type="text" id="dropLoc" placeholder="Where to go?">
+                    <label>Destination Drop Point</label>
+                    <div class="input-row">
+                        <input type="text" id="dropLoc" placeholder="Use GPS button for drop pin">
+                        <button class="btn-gps" onclick="getDropGPS()" title="Get Drop GPS">📍</button>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label>Your Phone Number</label>
@@ -258,8 +264,10 @@
     </div>
 
     <script>
-        let currentLat = null;
-        let currentLon = null;
+        let pickupLat = null;
+        let pickupLon = null;
+        let dropLat = null;
+        let dropLon = null;
 
         function switchView(role) {
             const custView = document.getElementById('customerView');
@@ -282,26 +290,47 @@
             }
         }
 
-        // GPS Live Location Fetcher
-        function getGPSLocation() {
+        // Get Pickup GPS
+        function getPickupGPS() {
             if (navigator.geolocation) {
-                document.getElementById('pickupLoc').value = "Acquiring GPS location...";
+                document.getElementById('pickupLoc').value = "Detecting pickup GPS...";
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
-                        currentLat = position.coords.latitude;
-                        currentLon = position.coords.longitude;
-                        document.getElementById('pickupLoc').value = `GPS Pin (${currentLat.toFixed(4)}, ${currentLon.toFixed(4)})`;
+                        pickupLat = position.coords.latitude;
+                        pickupLon = position.coords.longitude;
+                        document.getElementById('pickupLoc').value = `Pickup Pin (${pickupLat.toFixed(4)}, ${pickupLon.toFixed(4)})`;
                     },
                     (error) => {
-                        alert("GPS permission denied or unavailable. Please type location manually.");
+                        alert("GPS permission denied or failed.");
                         document.getElementById('pickupLoc').value = "";
-                        currentLat = null;
-                        currentLon = null;
+                        pickupLat = null; pickupLon = null;
                     },
                     { enableHighAccuracy: true }
                 );
             } else {
-                alert("Geolocation is not supported by your browser.");
+                alert("Geolocation not supported.");
+            }
+        }
+
+        // Get Drop GPS
+        function getDropGPS() {
+            if (navigator.geolocation) {
+                document.getElementById('dropLoc').value = "Detecting drop GPS...";
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        dropLat = position.coords.latitude;
+                        dropLon = position.coords.longitude;
+                        document.getElementById('dropLoc').value = `Drop Pin (${dropLat.toFixed(4)}, ${dropLon.toFixed(4)})`;
+                    },
+                    (error) => {
+                        alert("GPS permission denied or failed.");
+                        document.getElementById('dropLoc').value = "";
+                        dropLat = null; dropLon = null;
+                    },
+                    { enableHighAccuracy: true }
+                );
+            } else {
+                alert("Geolocation not supported.");
             }
         }
 
@@ -311,7 +340,7 @@
             const phone = document.getElementById('custPhone').value;
 
             if(!pickup || !drop || !phone) {
-                alert("Please fill all required details");
+                alert("Please fill all details and location pins");
                 return;
             }
 
@@ -323,8 +352,10 @@
                 pickup: pickup,
                 drop: drop,
                 phone: phone,
-                lat: currentLat,
-                lon: currentLon,
+                pickupLat: pickupLat,
+                pickupLon: pickupLon,
+                dropLat: dropLat,
+                dropLon: dropLon,
                 distance: estimatedKm,
                 fare: calculatedFare,
                 status: 'Searching',
@@ -339,7 +370,7 @@
             document.getElementById('statusDesc').innerText = `Distance: ~${estimatedKm} km | Fare: ₹${calculatedFare} (0% Commission).`;
             document.getElementById('customerDriverContact').classList.add('hidden');
 
-            alert("Ride request broadcasted successfully!");
+            alert("Ride request sent successfully!");
         }
 
         function renderDriverFeed() {
@@ -357,17 +388,21 @@
                 feed.innerHTML = `
                     <div class="ride-card">
                         <h3 style="color: #065f46; font-size: 16px;">Ride Locked</h3>
-                        <p class="info-text" style="margin-top: 6px;">This ride has already been accepted.</p>
+                        <p class="info-text" style="margin-top: 6px;">This trip is already accepted by a driver.</p>
                     </div>
                 `;
                 return;
             }
 
-            // Google Maps link generation if coordinates exist
-            let mapsButtonHtml = '';
-            if (ride.lat && ride.lon) {
-                const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${ride.lat},${ride.lon}`;
-                mapsButtonHtml = `<a href="${mapsUrl}" target="_blank" class="btn-action btn-maps">📍 Open GPS in Google Maps</a>`;
+            // Navigation Buttons for Pickup and Drop
+            let mapsButtonsHtml = '';
+            if (ride.pickupLat && ride.pickupLon) {
+                const pickupMapsUrl = `https://www.google.com/maps/search/?api=1&query=${ride.pickupLat},${ride.pickupLon}`;
+                mapsButtonsHtml += `<a href="${pickupMapsUrl}" target="_blank" class="btn-action btn-maps">📍 1. Navigate to Pickup</a>`;
+            }
+            if (ride.dropLat && ride.dropLon) {
+                const dropMapsUrl = `https://www.google.com/maps/search/?api=1&query=${ride.dropLat},${ride.dropLon}`;
+                mapsButtonsHtml += `<a href="${dropMapsUrl}" target="_blank" class="btn-action btn-drop-maps">🏁 2. Navigate to Drop Point</a>`;
             }
 
             feed.innerHTML = `
@@ -377,8 +412,8 @@
                     <p class="info-text"><strong>Drop:</strong> ${ride.drop}</p>
                     <p class="info-text"><strong>Est. Distance:</strong> ~${ride.distance} km</p>
                     <div class="fare-tag">Earnings: ₹${ride.fare}</div>
-                    ${mapsButtonHtml}
-                    <button class="btn-primary" style="background-color: #059669; margin-top: 8px; padding: 12px;" onclick="acceptRide()">Accept Ride Instantly</button>
+                    ${mapsButtonsHtml}
+                    <button class="btn-primary" style="background-color: #059669; margin-top: 12px; padding: 12px;" onclick="acceptRide()">Accept Ride Instantly</button>
                 </div>
             `;
         }
@@ -388,7 +423,7 @@
             const driverPhone = document.getElementById('driverPhone').value;
 
             if(ride.status === 'Accepted') {
-                alert("Oops! Yeh ride pehle hi koi aur accept kar chuka hai.");
+                alert("Yeh ride pehle hi koi aur accept kar chuka hai!");
                 renderDriverFeed();
                 return;
             }
@@ -397,7 +432,7 @@
             ride.acceptedBy = driverPhone;
             localStorage.setItem('active_ride', JSON.stringify(ride));
 
-            alert("Ride successfully locked!");
+            alert("Ride successfully locked for you!");
             renderDriverFeed();
         }
 
@@ -412,7 +447,7 @@
             if(ride.status === 'Accepted') {
                 statusCard.classList.remove('hidden');
                 document.getElementById('statusTitle').innerText = "Auto Confirmed! 🛺";
-                document.getElementById('statusDesc').innerText = `Your driver is on the way. Fare: ₹${ride.fare}`;
+                document.getElementById('statusDesc').innerText = `Driver is on the way. Fare: ₹${ride.fare}`;
                 
                 contactDiv.classList.remove('hidden');
                 contactDiv.innerHTML = `
