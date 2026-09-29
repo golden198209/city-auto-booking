@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yatri Auto - Live Test Mode</title>
+    <title>Yatri Auto - Passenger Payment & Driver Gateway</title>
     <!-- Razorpay Checkout Script -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <style>
@@ -238,7 +238,7 @@
                 
                 <div class="role-card-select" onclick="chooseRole('customer')">
                     <h3>👤 I am a Passenger</h3>
-                    <p>Book an auto instantly with 0% commission.</p>
+                    <p>Book an auto & pay direct to driver (0% commission).</p>
                 </div>
 
                 <div class="role-card-select" onclick="chooseRole('driver')">
@@ -412,13 +412,13 @@
             showView('driverPass');
         }
 
-        // Razorpay Test Integration Function
+        // Razorpay Test Integration for Driver Pass
         function payWithRazorpay() {
             const tempProfile = JSON.parse(localStorage.getItem('temp_driver') || '{}');
 
             var options = {
-                "key": "rzp_test_Thw95fS2j4I3UC", // Aapki Real Test Key
-                "amount": 3000, // 3000 paise = ₹30.00
+                "key": "rzp_test_Thw95fS2j4I3UC",
+                "amount": 3000,
                 "currency": "INR",
                 "name": "Yatri Auto",
                 "description": "Daily Pass Activation (0% Commission)",
@@ -571,16 +571,28 @@
                 mapsButtonsHtml += `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ride.drop)}" target="_blank" class="btn-action btn-drop-maps">🏁 2. Drop: ${ride.drop}</a>`;
             }
 
+            if(ride.status === 'Completed') {
+                feed.innerHTML = `
+                    <div class="card" style="background: #f0fdf4; border-color: #bbf7d0; text-align: center;">
+                        <h3 style="color: #047857; margin-bottom: 6px;">🎉 Ride Completed!</h3>
+                        <p class="info-text">Fare collected by you: <strong>₹${ride.fare}</strong> (0% commission kept by app)</p>
+                        <button class="btn-primary" style="margin-top: 12px; background-color: #2563eb;" onclick="clearCompletedRide()">Back to Radar Feed</button>
+                    </div>
+                `;
+                return;
+            }
+
             if(ride.status === 'Accepted') {
                 feed.innerHTML = `
                     <div class="ride-card">
-                        <span style="font-size: 11px; font-weight: bold; background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 4px;">RIDE LOCKED (Accepted by you)</span>
+                        <span style="font-size: 11px; font-weight: bold; background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 4px;">RIDE LOCKED (In Progress)</span>
                         <p class="info-text" style="margin-top: 8px;"><strong>Pickup:</strong> ${ride.pickup}</p>
                         <p class="info-text"><strong>Drop:</strong> ${ride.drop}</p>
                         <p class="info-text"><strong>Customer Phone:</strong> <a href="tel:${ride.phone}" style="color: #2563eb; font-weight: bold;">${ride.phone}</a></p>
-                        <div class="fare-tag">Earnings: ₹${ride.fare}</div>
+                        <div class="fare-tag">Fare to Collect: ₹${ride.fare} (Direct Cash/UPI)</div>
                         ${mapsButtonsHtml}
-                        <button class="btn-primary" style="background-color: #dc2626; margin-top: 12px; padding: 12px;" onclick="cancelRideByDriver()">Cancel / Reset Ride</button>
+                        <button class="btn-primary" style="background-color: #059669; margin-top: 12px; padding: 12px;" onclick="completeRideByDriver()">Complete Ride & Confirm Payment</button>
+                        <button class="btn-primary" style="background-color: #dc2626; margin-top: 8px; padding: 10px;" onclick="cancelRideByDriver()">Cancel Ride</button>
                     </div>
                 `;
                 return;
@@ -592,7 +604,7 @@
                     <p class="info-text" style="margin-top: 8px;"><strong>Pickup:</strong> ${ride.pickup}</p>
                     <p class="info-text"><strong>Drop:</strong> ${ride.drop}</p>
                     <p class="info-text"><strong>Est. Distance:</strong> ~${ride.distance} km</p>
-                    <div class="fare-tag">Earnings: ₹${ride.fare}</div>
+                    <div class="fare-tag">Fare: ₹${ride.fare}</div>
                     ${mapsButtonsHtml}
                     <button class="btn-primary" style="background-color: #059669; margin-top: 12px; padding: 12px;" onclick="acceptRide()">Accept Ride Instantly</button>
                 </div>
@@ -617,6 +629,19 @@
             renderDriverFeed();
         }
 
+        function completeRideByDriver() {
+            let ride = JSON.parse(localStorage.getItem('active_ride'));
+            ride.status = 'Completed';
+            localStorage.setItem('active_ride', JSON.stringify(ride));
+            alert("Ride completed successfully!");
+            renderDriverFeed();
+        }
+
+        function clearCompletedRide() {
+            localStorage.removeItem('active_ride');
+            renderDriverFeed();
+        }
+
         function cancelRideByDriver() {
             if(confirm("Kya aap yeh ride cancel karna chahte hain?")) {
                 localStorage.removeItem('active_ride');
@@ -636,11 +661,17 @@
             const statusCard = document.getElementById('customerStatusCard');
             const contactDiv = document.getElementById('customerDriverContact');
 
+            statusCard.classList.res('hidden', false);
             statusCard.classList.remove('hidden');
 
-            if(ride.status === 'Accepted') {
+            if(ride.status === 'Completed') {
+                document.getElementById('statusTitle').innerText = "Ride Finished! 🎉";
+                document.getElementById('statusDesc').innerText = `Total Fare: ₹${ride.fare}. Please pay cash or direct UPI to the driver. Thank you for using Yatri Auto!`;
+                contactDiv.innerHTML = `<button class="btn-primary" style="background-color: #10b981; margin-top: 10px;" onclick="localStorage.removeItem('active_ride'); location.reload();">Book Another Ride</button>`;
+                contactDiv.classList.remove('hidden');
+            } else if(ride.status === 'Accepted') {
                 document.getElementById('statusTitle').innerText = "Auto Confirmed! 🛺";
-                document.getElementById('statusDesc').innerText = `Driver is on the way to pickup. Drop: ${ride.drop}`;
+                document.getElementById('statusDesc').innerText = `Driver is on the way. Fare: ₹${ride.fare} (Pay direct to driver).`;
                 
                 contactDiv.classList.remove('hidden');
                 contactDiv.innerHTML = `
@@ -649,7 +680,7 @@
                 `;
             } else {
                 document.getElementById('statusTitle').innerText = "Finding Nearby Auto...";
-                document.getElementById('statusDesc').innerText = `Drop: ${ride.drop} | Fare: ₹${ride.fare} (0% Commission).`;
+                document.getElementById('statusDesc').innerText = `Drop: ${ride.drop} | Estimated Fare: ₹${ride.fare} (0% Commission).`;
                 contactDiv.classList.add('hidden');
             }
         }
