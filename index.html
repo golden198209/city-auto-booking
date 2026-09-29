@@ -110,6 +110,7 @@
         .input-row {
             display: flex;
             gap: 8px;
+            width: 100%;
         }
         input {
             width: 100%;
@@ -120,17 +121,22 @@
             outline: none;
             transition: border-color 0.2s;
         }
+        .input-row input {
+            flex: 1;
+            width: auto;
+        }
         input:focus {
             border-color: var(--primary);
         }
         .btn-gps {
             background: #e5e7eb;
-            border: none;
-            padding: 0 14px;
+            border: 1px solid #d1d5db;
+            padding: 0 16px;
             border-radius: 10px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 18px;
             transition: background 0.2s;
+            white-space: nowrap;
         }
         .btn-gps:hover {
             background: #d1d5db;
@@ -290,7 +296,6 @@
             }
         }
 
-        // Get Pickup GPS Location
         function getPickupGPS() {
             if (navigator.geolocation) {
                 document.getElementById('pickupLoc').value = "Detecting pickup GPS...";
@@ -312,7 +317,6 @@
             }
         }
 
-        // Get Drop GPS Location
         function getDropGPS() {
             if (navigator.geolocation) {
                 document.getElementById('dropLoc').value = "Detecting drop GPS...";
@@ -384,16 +388,6 @@
 
             const ride = JSON.parse(rideData);
 
-            if(ride.status === 'Accepted') {
-                feed.innerHTML = `
-                    <div class="ride-card">
-                        <h3 style="color: #065f46; font-size: 16px;">Ride Locked</h3>
-                        <p class="info-text" style="margin-top: 6px;">This trip is already accepted by a driver.</p>
-                    </div>
-                `;
-                return;
-            }
-
             let mapsButtonsHtml = '';
             if (ride.pickupLat && ride.pickupLon) {
                 const pickupMapsUrl = `https://www.google.com/maps/search/?api=1&query=${ride.pickupLat},${ride.pickupLon}`;
@@ -409,6 +403,23 @@
                 mapsButtonsHtml += `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ride.drop)}" target="_blank" class="btn-action btn-drop-maps">🏁 2. Drop: ${ride.drop}</a>`;
             }
 
+            // Agar ride accept ho chuki hai, toh status dikhao saath mein navigation buttons bhi rakhho taaki gayab na ho
+            if(ride.status === 'Accepted') {
+                feed.innerHTML = `
+                    <div class="ride-card">
+                        <span style="font-size: 11px; font-weight: bold; background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 4px;">RIDE LOCKED (Accepted by you)</span>
+                        <p class="info-text" style="margin-top: 8px;"><strong>Pickup:</strong> ${ride.pickup}</p>
+                        <p class="info-text"><strong>Drop:</strong> ${ride.drop}</p>
+                        <p class="info-text"><strong>Customer Phone:</strong> <a href="tel:${ride.phone}" style="color: #2563eb; font-weight: bold;">${ride.phone}</a></p>
+                        <div class="fare-tag">Earnings: ₹${ride.fare}</div>
+                        ${mapsButtonsHtml}
+                        <button class="btn-primary" style="background-color: #dc2626; margin-top: 12px; padding: 12px;" onclick="cancelRideByDriver()">Cancel / Reset Ride</button>
+                    </div>
+                `;
+                return;
+            }
+
+            // Agar pending hai
             feed.innerHTML = `
                 <div class="ride-card">
                     <span style="font-size: 11px; font-weight: bold; background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 4px;">LIVE REQUEST</span>
@@ -427,7 +438,7 @@
             const driverPhone = document.getElementById('driverPhone').value;
 
             if(ride.status === 'Accepted') {
-                alert("Yeh ride pehle hi koi aur accept kar chuka hai!");
+                alert("Yeh ride pehle hi accept ho chuki hai!");
                 renderDriverFeed();
                 return;
             }
@@ -440,16 +451,28 @@
             renderDriverFeed();
         }
 
+        function cancelRideByDriver() {
+            if(confirm("Kya aap yeh ride cancel karna chahte hain?")) {
+                localStorage.removeItem('active_ride');
+                renderDriverFeed();
+                alert("Ride reset successfully.");
+            }
+        }
+
         function checkCustomerStatus() {
             const rideData = localStorage.getItem('active_ride');
-            if(!rideData) return;
+            if(!rideData) {
+                document.getElementById('customerStatusCard').classList.add('hidden');
+                return;
+            }
 
             const ride = JSON.parse(rideData);
             const statusCard = document.getElementById('customerStatusCard');
             const contactDiv = document.getElementById('customerDriverContact');
 
+            statusCard.classList.remove('hidden');
+
             if(ride.status === 'Accepted') {
-                statusCard.classList.remove('hidden');
                 document.getElementById('statusTitle').innerText = "Auto Confirmed! 🛺";
                 document.getElementById('statusDesc').innerText = `Driver is on the way to pickup. Drop: ${ride.drop}`;
                 
@@ -458,6 +481,10 @@
                     <p class="info-text" style="margin-top: 6px;"><strong>Driver Phone:</strong> ${ride.acceptedBy}</p>
                     <a href="tel:${ride.acceptedBy}" class="btn-action">📞 Call Driver Now</a>
                 `;
+            } else {
+                document.getElementById('statusTitle').innerText = "Finding Nearby Auto...";
+                document.getElementById('statusDesc').innerText = `Drop: ${ride.drop} | Fare: ₹${ride.fare} (0% Commission).`;
+                contactDiv.classList.add('hidden');
             }
         }
     </script>
