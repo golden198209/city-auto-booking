@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yatri Auto - Live Booking</title>
+    <title>Yatri Auto - Smart Booking</title>
     <style>
         :root {
             --primary: #f59e0b;
@@ -107,6 +107,10 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
+        .input-row {
+            display: flex;
+            gap: 8px;
+        }
         input {
             width: 100%;
             padding: 14px;
@@ -118,6 +122,18 @@
         }
         input:focus {
             border-color: var(--primary);
+        }
+        .btn-gps {
+            background: #e5e7eb;
+            border: none;
+            padding: 0 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.2s;
+        }
+        .btn-gps:hover {
+            background: #d1d5db;
         }
         .btn-primary {
             background-color: var(--primary);
@@ -183,7 +199,7 @@
     <div class="app-container">
         <div class="app-header">
             <h1>🛺 Yatri Auto</h1>
-            <p>Zero Commission • ₹30 Daily Pass Model</p>
+            <p>Zero Commission • Smart Fare & GPS</p>
         </div>
 
         <div class="nav-tabs">
@@ -196,17 +212,20 @@
             <div id="customerView">
                 <div class="form-group">
                     <label>Pickup Point</label>
-                    <input type="text" id="pickupLoc" value="Railway Station Main Gate">
+                    <div class="input-row">
+                        <input type="text" id="pickupLoc" placeholder="Enter pickup or use GPS">
+                        <button class="btn-gps" onclick="getGPSLocation()" title="Use Current GPS Location">📍</button>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label>Destination Drop</label>
-                    <input type="text" id="dropLoc" value="City Center Mall">
+                    <input type="text" id="dropLoc" placeholder="Where to go?">
                 </div>
                 <div class="form-group">
                     <label>Your Phone Number</label>
-                    <input type="text" id="custPhone" value="9876543210">
+                    <input type="text" id="custPhone" placeholder="10-digit mobile number">
                 </div>
-                <button class="btn-primary" onclick="requestRide()">Find Auto (0% Commission)</button>
+                <button class="btn-primary" onclick="requestRide()">Calculate Fare & Find Auto</button>
 
                 <div id="customerStatusCard" class="card hidden" style="margin-top: 20px;">
                     <h3 id="statusTitle" style="color: #b45309; font-size: 16px; margin-bottom: 6px;">Searching Auto...</h3>
@@ -257,24 +276,47 @@
             }
         }
 
+        // GPS Location Fetcher
+        function getGPSLocation() {
+            if (navigator.geolocation) {
+                document.getElementById('pickupLoc').value = "Detecting GPS location...";
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude.toFixed(4);
+                        const lon = position.coords.longitude.toFixed(4);
+                        document.getElementById('pickupLoc').value = `Current Location (${lat}, ${lon})`;
+                    },
+                    (error) => {
+                        alert("GPS error or permission denied. Please type manually.");
+                        document.getElementById('pickupLoc').value = "";
+                    }
+                );
+            } else {
+                alert("Geolocation is not supported by your browser");
+            }
+        }
+
         function requestRide() {
             const pickup = document.getElementById('pickupLoc').value;
             const drop = document.getElementById('dropLoc').value;
             const phone = document.getElementById('custPhone').value;
 
             if(!pickup || !drop || !phone) {
-                alert("Please fill all details");
+                alert("Please fill all details (Pickup, Drop, and Phone)");
                 return;
             }
 
-            const estimatedFare = Math.floor(Math.random() * 50) + 65;
+            // Dynamic Fare Formula: Base Fare (₹30) + Random simulated distance calculation (e.g., ₹12 per km)
+            const estimatedKm = (Math.random() * 4 + 2).toFixed(1); // 2km to 6km range
+            const calculatedFare = Math.round(30 + (estimatedKm * 12));
 
             const rideInfo = {
                 id: Date.now(),
                 pickup: pickup,
                 drop: drop,
                 phone: phone,
-                fare: estimatedFare,
+                distance: estimatedKm,
+                fare: calculatedFare,
                 status: 'Searching',
                 acceptedBy: null
             };
@@ -284,10 +326,10 @@
             const statusCard = document.getElementById('customerStatusCard');
             statusCard.classList.remove('hidden');
             document.getElementById('statusTitle').innerText = "Finding Nearby Auto...";
-            document.getElementById('statusDesc').innerText = `Route: ${pickup} ➔ ${drop}. Est. Fare: ₹${estimatedFare}.`;
+            document.getElementById('statusDesc').innerText = `Distance: ~${estimatedKm} km | Fare: ₹${calculatedFare} (0% Commission).`;
             document.getElementById('customerDriverContact').classList.add('hidden');
 
-            alert("Ride request broadcasted to all nearby drivers!");
+            alert("Ride request created! Check Driver tab.");
         }
 
         function renderDriverFeed() {
@@ -304,8 +346,8 @@
             if(ride.status === 'Accepted') {
                 feed.innerHTML = `
                     <div class="ride-card">
-                        <h3 style="color: #065f46; font-size: 16px;">Ride Already Taken</h3>
-                        <p class="info-text" style="margin-top: 6px;">This trip has been locked by another driver or completed.</p>
+                        <h3 style="color: #065f46; font-size: 16px;">Ride Locked</h3>
+                        <p class="info-text" style="margin-top: 6px;">This trip is already accepted by a driver.</p>
                     </div>
                 `;
                 return;
@@ -313,10 +355,11 @@
 
             feed.innerHTML = `
                 <div class="ride-card">
-                    <span style="font-size: 11px; font-weight: bold; background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 4px;">FIRST COME - FIRST SERVE</span>
+                    <span style="font-size: 11px; font-weight: bold; background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 4px;">LIVE REQUEST</span>
                     <p class="info-text" style="margin-top: 8px;"><strong>Pickup:</strong> ${ride.pickup}</p>
                     <p class="info-text"><strong>Drop:</strong> ${ride.drop}</p>
-                    <div class="fare-tag">Est. Fare: ₹${ride.fare}</div>
+                    <p class="info-text"><strong>Distance:</strong> ~${ride.distance} km</p>
+                    <div class="fare-tag">Earnings: ₹${ride.fare}</div>
                     <button class="btn-primary" style="background-color: #059669; margin-top: 8px; padding: 10px;" onclick="acceptRide()">Accept Ride Instantly</button>
                 </div>
             `;
@@ -327,7 +370,7 @@
             const driverPhone = document.getElementById('driverPhone').value;
 
             if(ride.status === 'Accepted') {
-                alert("Oops! Yeh ride pehle hi koi aur driver accept kar chuka hai.");
+                alert("Yeh ride pehle hi accept ho chuki hai!");
                 renderDriverFeed();
                 return;
             }
@@ -336,7 +379,7 @@
             ride.acceptedBy = driverPhone;
             localStorage.setItem('active_ride', JSON.stringify(ride));
 
-            alert("Badhai ho! Ride aapke paas lock ho gayi hai.");
+            alert("Ride successfully locked for you!");
             renderDriverFeed();
         }
 
@@ -350,12 +393,12 @@
 
             if(ride.status === 'Accepted') {
                 statusCard.classList.remove('hidden');
-                document.getElementById('statusTitle').innerText = "Driver Assigned! 🛺";
-                document.getElementById('statusDesc').innerText = `Your auto is on the way from pickup point.`;
+                document.getElementById('statusTitle').innerText = "Auto Confirmed! 🛺";
+                document.getElementById('statusDesc').innerText = `Your driver is heading to your pickup location. Fare: ₹${ride.fare}`;
                 
                 contactDiv.classList.remove('hidden');
                 contactDiv.innerHTML = `
-                    <p class="info-text"><strong>Driver Contact:</strong> ${ride.acceptedBy}</p>
+                    <p class="info-text"><strong>Driver Phone:</strong> ${ride.acceptedBy}</p>
                     <a href="tel:${ride.acceptedBy}" class="btn-call">Call Driver Now</a>
                 `;
             }
