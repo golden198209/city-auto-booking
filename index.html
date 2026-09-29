@@ -3,249 +3,324 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>City Auto - Zero Commission Booking</title>
+    <title>Yatri Auto - Zero Commission Mobility</title>
     <style>
         :root {
             --primary: #f59e0b;
-            --primary-dark: #d97706;
-            --dark: #1f2937;
-            --light: #f3f4f6;
+            --primary-hover: #d97706;
+            --dark: #111827;
+            --light: #f9fafb;
+            --card-bg: #ffffff;
             --success: #10b981;
+            --gray: #6b7280;
         }
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
         body {
-            background-color: var(--light);
+            background-color: #f3f4f6;
             color: var(--dark);
-            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 15px;
         }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-        h2 {
-            margin-bottom: 15px;
-            color: var(--dark);
-            border-bottom: 2px solid var(--primary);
-            padding-bottom: 8px;
-        }
-        .section {
-            margin-bottom: 30px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-        }
-        input {
+        .app-container {
             width: 100%;
-            padding: 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            font-size: 16px;
+            max-width: 450px;
+            background: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #e5e7eb;
         }
-        button {
-            background-color: var(--primary);
+        /* Header */
+        .app-header {
+            background: linear-gradient(135deg, #111827, #1f2937);
             color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .app-header h1 {
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .app-header p {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-top: 4px;
+        }
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            background: #e5e7eb;
+            padding: 4px;
+        }
+        .nav-tabs button {
+            flex: 1;
+            padding: 10px;
             border: none;
-            padding: 12px 20px;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 6px;
+            background: transparent;
+            font-weight: 600;
+            font-size: 14px;
             cursor: pointer;
-            width: 100%;
-            transition: background 0.2s;
+            border-radius: 18px;
+            transition: all 0.2s ease;
+            color: var(--gray);
         }
-        button:hover {
-            background-color: var(--primary-dark);
+        .nav-tabs button.active {
+            background: white;
+            color: var(--dark);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
+        /* Content Body */
+        .app-body {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+        .hidden {
+            display: none !important;
+        }
+        /* Cards & Forms */
         .card {
             background: #fffbeb;
             border: 1px solid #fde68a;
-            padding: 15px;
-            border-radius: 6px;
-            margin-top: 10px;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
         }
-        .status-badge {
-            display: inline-block;
-            padding: 5px 10px;
-            background: var(--success);
+        .form-group {
+            margin-bottom: 16px;
+        }
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--gray);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input:focus {
+            border-color: var(--primary);
+        }
+        .btn-primary {
+            background-color: var(--primary);
             color: white;
+            border: none;
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+        /* Badge */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #ecfdf5;
+            color: var(--success);
+            padding: 6px 12px;
             border-radius: 20px;
             font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            border: 1px solid #a7f3d0;
+        }
+        .ride-card {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 12px;
+        }
+        .fare-tag {
+            font-size: 18px;
             font-weight: bold;
-            margin-bottom: 10px;
+            color: #047857;
+            margin: 8px 0;
         }
-        .ride-request {
-            background: #e0f2fe;
-            border: 1px solid #bae6fd;
-            padding: 15px;
-            border-radius: 6px;
-            margin-top: 10px;
-        }
-        .btn-accept {
-            background-color: var(--success);
-            margin-top: 10px;
-        }
-        .btn-accept:hover {
-            background-color: #059669;
-        }
-        .switcher {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .switcher button {
-            background: #e5e7eb;
-            color: var(--dark);
-        }
-        .switcher button.active {
-            background: var(--dark);
-            color: white;
-        }
-        .hidden {
-            display: none;
+        .info-text {
+            font-size: 13px;
+            color: var(--gray);
+            line-height: 1.4;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>🛺 City Auto (Zero Commission)</h1>
-        <p style="color: #6b7280; margin-bottom: 20px;">Local Auto Booking System Prototype</p>
-
-        <!-- Role Switcher -->
-        <div class="switcher">
-            <button id="btnCustomerTab" class="active" onclick="switchTab('customer')">Customer View</button>
-            <button id="btnDriverTab" onclick="switchTab('driver')">Driver View</button>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="app-header">
+            <h1>🛺 Yatri Auto</h1>
+            <p>Zero Commission • ₹30 Daily Pass Model</p>
         </div>
 
-        <!-- CUSTOMER SECTION -->
-        <div id="customerSection" class="section">
-            <h2>Book an Auto</h2>
-            <div class="form-group">
-                <label>Pickup Location</label>
-                <input type="text" id="pickup" placeholder="e.g., Railway Station" value="Main Bus Stand">
-            </div>
-            <div class="form-group">
-                <label>Drop Location</label>
-                <input type="text" id="drop" placeholder="e.g., Civil Lines" value="City Market">
-            </div>
-            <button onclick="bookAuto()">Find Nearest Auto</button>
-
-            <div id="customerStatus" class="card hidden" style="margin-top: 20px;">
-                <h3>Status: <span id="rideState" style="color: var(--primary-dark);">Searching...</span></h3>
-                <p id="assignedDriverInfo" style="margin-top: 5px;"></p>
-            </div>
+        <!-- Role Switcher Tabs -->
+        <div class="nav-tabs">
+            <button id="tabCust" class="active" onclick="switchView('customer')">Passenger</button>
+            <button id="tabDriver" onclick="switchView('driver')">Driver Partner</button>
         </div>
 
-        <!-- DRIVER SECTION -->
-        <div id="driverSection" class="section hidden">
-            <h2>Driver Dashboard</h2>
-            <div class="status-badge">₹30 Daily Pass: ACTIVE ✅</div>
+        <!-- APP BODY -->
+        <div class="app-body">
             
-            <h3>Live Requests from City</h3>
-            <div id="driverRequestsContainer">
-                <p style="color: #6b7280; margin-top: 10px;">No new requests right now. Book an auto from the Customer view to test!</p>
+            <!-- CUSTOMER VIEW -->
+            <div id="customerView">
+                <div class="form-group">
+                    <label>Pickup Point</label>
+                    <input type="text" id="pickupLoc" value="Railway Station Main Gate">
+                </div>
+                <div class="form-group">
+                    <label>Destination Drop</label>
+                    <input type="text" id="dropLoc" value="City Center Mall">
+                </div>
+                <button class="btn-primary" onclick="requestRide()">Find Auto (0% Commission)</button>
+
+                <div id="customerStatusCard" class="card hidden" style="margin-top: 20px;">
+                    <h3 id="statusTitle" style="color: #b45309; font-size: 16px; margin-bottom: 6px;">Searching Auto...</h3>
+                    <p id="statusDesc" class="info-text">Broadcasting your request to nearby auto drivers instantly.</p>
+                </div>
             </div>
+
+            <!-- DRIVER VIEW -->
+            <div id="driverView" class="hidden">
+                <div class="badge">
+                    <span>🟢 ₹30 Daily Pass Active</span>
+                </div>
+
+                <h3 style="font-size: 15px; margin-bottom: 10px; color: var(--dark);">Live Radar Requests</h3>
+                <div id="driverFeed">
+                    <div class="card" style="background: #f9fafb; border-color: #e5e7eb;">
+                        <p class="info-text" style="text-align: center; color: var(--gray);">No ride requests in your area right now. Switch to Passenger tab to test booking!</p>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
     <script>
-        // Simple state management using browser memory
-        function switchTab(role) {
-            const customerSec = document.getElementById('customerSection');
-            const driverSec = document.getElementById('driverSection');
-            const btnCust = document.getElementById('btnCustomerTab');
-            const btnDrive = document.getElementById('btnDriverTab');
+        function switchView(role) {
+            const custView = document.getElementById('customerView');
+            const drivView = document.getElementById('driverView');
+            const tabC = document.getElementById('tabCust');
+            const tabD = document.getElementById('tabDriver');
 
             if(role === 'customer') {
-                customerSec.classList.remove('hidden');
-                driverSec.classList.add('hidden');
-                btnCust.classList.add('active');
-                btnDrive.classList.remove('active');
+                custView.classList.remove('hidden');
+                drivView.classList.add('hidden');
+                tabC.classList.add('active');
+                tabD.classList.remove('active');
             } else {
-                customerSec.classList.add('hidden');
-                driverSec.classList.remove('hidden');
-                btnDrive.classList.add('active');
-                btnCust.classList.remove('active');
-                loadRequests();
+                custView.classList.add('hidden');
+                drivView.classList.remove('hidden');
+                tabD.classList.add('active');
+                tabC.classList.remove('active');
+                renderDriverFeed();
             }
         }
 
-        function bookAuto() {
-            const pickup = document.getElementById('pickup').value;
-            const drop = document.getElementById('drop').value;
+        function requestRide() {
+            const pickup = document.getElementById('pickupLoc').value;
+            const drop = document.getElementById('dropLoc').value;
 
             if(!pickup || !drop) {
-                alert("Please enter pickup and drop locations");
+                alert("Please fill both locations");
                 return;
             }
 
-            // Save request to localStorage so driver view can see it
-            const rideData = {
+            // Estimate random fair between 60 to 110 based on text length simulation
+            const estimatedFare = Math.floor(Math.random() * 50) + 65;
+
+            const rideInfo = {
                 id: Date.now(),
                 pickup: pickup,
                 drop: drop,
+                fare: estimatedFare,
                 status: 'Searching'
             };
-            localStorage.setItem('currentRide', JSON.stringify(rideData));
 
-            // Show status
-            const statusBox = document.getElementById('customerStatus');
-            statusBox.classList.remove('hidden');
-            document.getElementById('rideState').innerText = "Searching for nearby autos...";
-            document.getElementById('assignedDriverInfo').innerText = "Broadcasting to local drivers...";
+            localStorage.setItem('active_ride', JSON.stringify(rideInfo));
 
-            // Switch to driver tab automatically for easy testing
-            setTimeout(() => {
-                alert("Ride request broadcasted! Check Driver View.");
-            }, 500);
+            // Show status in customer view
+            const statusCard = document.getElementById('customerStatusCard');
+            statusCard.classList.remove('hidden');
+            document.getElementById('statusTitle').innerText = "Finding Nearby Auto...";
+            document.getElementById('statusDesc').innerText = `Route: ${pickup} ➔ ${drop}. Estimated fare: ₹${estimatedFare}.`;
+
+            alert("Ride request sent successfully! Switch to 'Driver Partner' tab to accept it.");
         }
 
-        function loadRequests() {
-            const container = document.getElementById('driverRequestsContainer');
-            const rideJson = localStorage.getItem('currentRide');
+        function renderDriverFeed() {
+            const feed = document.getElementById('driverFeed');
+            const rideData = localStorage.getItem('active_ride');
 
-            if(!rideJson) {
-                container.innerHTML = '<p style="color: #6b7280; margin-top: 10px;">No new requests right now.</p>';
+            if(!rideData) {
+                feed.innerHTML = `<div class="card" style="background: #f9fafb; border-color: #e5e7eb;"><p class="info-text" style="text-align: center; color: var(--gray);">No ride requests right now.</p></div>`;
                 return;
             }
 
-            const ride = JSON.parse(rideJson);
+            const ride = JSON.parse(rideData);
+
             if(ride.status === 'Accepted') {
-                container.innerHTML = `<div class="card"><h3>Ride Accepted!</h3><p>From: ${ride.pickup} ➔ To: ${ride.drop}</p></div>`;
+                feed.innerHTML = `
+                    <div class="ride-card">
+                        <h3 style="color: #065f46; font-size: 16px;">Ride Confirmed & Assigned! ✅</h3>
+                        <p class="info-text" style="margin-top: 6px;"><strong>From:</strong> ${ride.pickup}</p>
+                        <p class="info-text"><strong>To:</strong> ${ride.drop}</p>
+                        <div class="fare-tag">Earnings: ₹${ride.fare} (Keep 100%)</div>
+                    </div>
+                `;
                 return;
             }
 
-            container.innerHTML = `
-                <div class="ride-request">
-                    <p><strong>Pickup:</strong> ${ride.pickup}</p>
-                    <p><strong>Drop:</strong> ${ride.drop}</p>
-                    <p><strong>Estimated Fare:</strong> ₹80 (0% Commission)</p>
-                    <button class="btn-accept" onclick="acceptRide()">Accept Ride</button>
+            feed.innerHTML = `
+                <div class="ride-card">
+                    <span style="font-size: 11px; font-weight: bold; background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 4px;">NEW REQUEST</span>
+                    <p class="info-text" style="margin-top: 8px;"><strong>Pickup:</strong> ${ride.pickup}</p>
+                    <p class="info-text"><strong>Drop:</strong> ${ride.drop}</p>
+                    <div class="fare-tag">Est. Fare: ₹${ride.fare}</div>
+                    <button class="btn-primary" style="background-color: #059669; margin-top: 8px; padding: 10px;" onclick="acceptRide()">Accept Ride (Zero Commission)</button>
                 </div>
             `;
         }
 
         function acceptRide() {
-            let ride = JSON.parse(localStorage.getItem('currentRide'));
+            let ride = JSON.parse(localStorage.getItem('active_ride'));
             ride.status = 'Accepted';
-            localStorage.setItem('currentRide', JSON.stringify(ride));
+            localStorage.setItem('active_ride', JSON.stringify(ride));
 
-            alert("You accepted the ride! Proceeding to pickup location.");
-            loadRequests();
+            alert("Ride accepted successfully! Head to the pickup location.");
+            renderDriverFeed();
         }
     </script>
 </body>
