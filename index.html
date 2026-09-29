@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yatri Auto - Dual GPS Navigation</title>
+    <title>Yatri Auto - Secure Role Selection</title>
     <style>
         :root {
             --primary: #f59e0b;
@@ -45,6 +45,7 @@
             color: white;
             padding: 20px;
             text-align: center;
+            position: relative;
         }
         .app-header h1 {
             font-size: 20px;
@@ -57,28 +58,6 @@
             font-size: 12px;
             color: #9ca3af;
             margin-top: 4px;
-        }
-        .nav-tabs {
-            display: flex;
-            background: #e5e7eb;
-            padding: 4px;
-        }
-        .nav-tabs button {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            background: transparent;
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-            border-radius: 18px;
-            transition: all 0.2s ease;
-            color: var(--gray);
-        }
-        .nav-tabs button.active {
-            background: white;
-            color: var(--dark);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
         .app-body {
             padding: 20px;
@@ -156,6 +135,29 @@
         .btn-primary:hover {
             background-color: var(--primary-hover);
         }
+        .role-card-select {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            margin-bottom: 16px;
+            transition: all 0.2s;
+        }
+        .role-card-select:hover {
+            border-color: var(--primary);
+            background: #fffbeb;
+        }
+        .role-card-select h3 {
+            font-size: 18px;
+            color: var(--dark);
+            margin-bottom: 6px;
+        }
+        .role-card-select p {
+            font-size: 13px;
+            color: var(--gray);
+        }
         .badge {
             display: inline-flex;
             align-items: center;
@@ -204,24 +206,47 @@
         .btn-drop-maps {
             background-color: #7c3aed;
         }
+        .logout-btn {
+            position: absolute;
+            right: 15px;
+            top: 20px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 6px 10px;
+            font-size: 11px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
 
     <div class="app-container">
         <div class="app-header">
-            <h1>🛺 Yatri Auto</h1>
-            <p>Zero Commission • Dual GPS Navigation</p>
-        </div>
-
-        <div class="nav-tabs">
-            <button id="tabCust" class="active" onclick="switchView('customer')">Passenger</button>
-            <button id="tabDriver" onclick="switchView('driver')">Driver Partner</button>
+            <h1 id="headerTitle">🛺 Yatri Auto</h1>
+            <p id="headerSub">Zero Commission • Dual GPS Navigation</p>
+            <button id="logoutBtn" class="logout-btn hidden" onclick="logoutApp()">Switch Role</button>
         </div>
 
         <div class="app-body">
+            <!-- ROLE SELECTION SCREEN -->
+            <div id="roleSelectView">
+                <p style="text-align: center; font-size: 14px; color: var(--gray); margin-bottom: 20px;">Aap app ko kis tarah use karna chahte hain?</p>
+                
+                <div class="role-card-select" onclick="selectRole('customer')">
+                    <h3>👤 I am a Passenger</h3>
+                    <p>Book an auto instantly with 0% commission.</p>
+                </div>
+
+                <div class="role-card-select" onclick="selectRole('driver')">
+                    <h3>🛺 I am a Driver Partner</h3>
+                    <p>Accept nearby rides & get direct live maps.</p>
+                </div>
+            </div>
+
             <!-- CUSTOMER VIEW -->
-            <div id="customerView">
+            <div id="customerView" class="hidden">
                 <div class="form-group">
                     <label>Pickup Point (Current Location)</label>
                     <div class="input-row">
@@ -275,25 +300,48 @@
         let dropLat = null;
         let dropLon = null;
 
-        function switchView(role) {
+        // Check if role was already chosen in this session
+        window.onload = function() {
+            const savedRole = localStorage.getItem('yatri_role');
+            if(savedRole) {
+                selectRole(savedRole, false);
+            }
+        }
+
+        function selectRole(role, save = true) {
+            if(save) {
+                localStorage.setItem('yatri_role', role);
+            }
+
+            const roleView = document.getElementById('roleSelectView');
             const custView = document.getElementById('customerView');
             const drivView = document.getElementById('driverView');
-            const tabC = document.getElementById('tabCust');
-            const tabD = document.getElementById('tabDriver');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const headerSub = document.getElementById('headerSub');
+
+            roleView.classList.add('hidden');
+            logoutBtn.classList.remove('hidden');
 
             if(role === 'customer') {
                 custView.classList.remove('hidden');
                 drivView.classList.add('hidden');
-                tabC.classList.add('active');
-                tabD.classList.remove('active');
+                headerSub.innerText = "Passenger Booking Panel";
                 checkCustomerStatus();
             } else {
                 custView.classList.add('hidden');
                 drivView.classList.remove('hidden');
-                tabD.classList.add('active');
-                tabC.classList.remove('active');
+                headerSub.innerText = "Driver Partner Radar";
                 renderDriverFeed();
             }
+        }
+
+        function logoutApp() {
+            localStorage.removeItem('yatri_role');
+            document.getElementById('roleSelectView').classList.remove('hidden');
+            document.getElementById('customerView').classList.add('hidden');
+            document.getElementById('driverView').classList.add('hidden');
+            document.getElementById('logoutBtn').classList.add('hidden');
+            document.getElementById('headerSub').innerText = "Zero Commission • Dual GPS Navigation";
         }
 
         function getPickupGPS() {
@@ -388,16 +436,6 @@
 
             const ride = JSON.parse(rideData);
 
-            if(ride.status === 'Accepted') {
-                feed.innerHTML = `
-                    <div class="ride-card">
-                        <h3 style="color: #065f46; font-size: 16px;">Ride Locked</h3>
-                        <p class="info-text" style="margin-top: 6px;">This trip is already accepted by a driver.</p>
-                    </div>
-                `;
-                return;
-            }
-
             let mapsButtonsHtml = '';
             if (ride.pickupLat && ride.pickupLon) {
                 const pickupMapsUrl = `https://www.google.com/maps/search/?api=1&query=${ride.pickupLat},${ride.pickupLon}`;
@@ -411,6 +449,21 @@
                 mapsButtonsHtml += `<a href="${dropMapsUrl}" target="_blank" class="btn-action btn-drop-maps">🏁 2. Navigate to Drop Point</a>`;
             } else {
                 mapsButtonsHtml += `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ride.drop)}" target="_blank" class="btn-action btn-drop-maps">🏁 2. Drop: ${ride.drop}</a>`;
+            }
+
+            if(ride.status === 'Accepted') {
+                feed.innerHTML = `
+                    <div class="ride-card">
+                        <span style="font-size: 11px; font-weight: bold; background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 4px;">RIDE LOCKED (Accepted by you)</span>
+                        <p class="info-text" style="margin-top: 8px;"><strong>Pickup:</strong> ${ride.pickup}</p>
+                        <p class="info-text"><strong>Drop:</strong> ${ride.drop}</p>
+                        <p class="info-text"><strong>Customer Phone:</strong> <a href="tel:${ride.phone}" style="color: #2563eb; font-weight: bold;">${ride.phone}</a></p>
+                        <div class="fare-tag">Earnings: ₹${ride.fare}</div>
+                        ${mapsButtonsHtml}
+                        <button class="btn-primary" style="background-color: #dc2626; margin-top: 12px; padding: 12px;" onclick="cancelRideByDriver()">Cancel / Reset Ride</button>
+                    </div>
+                `;
+                return;
             }
 
             feed.innerHTML = `
@@ -431,7 +484,7 @@
             const driverPhone = document.getElementById('driverPhone').value;
 
             if(ride.status === 'Accepted') {
-                alert("Yeh ride pehle hi koi aur accept kar chuka hai!");
+                alert("Yeh ride pehle hi accept ho chuki hai!");
                 renderDriverFeed();
                 return;
             }
@@ -444,16 +497,28 @@
             renderDriverFeed();
         }
 
+        function cancelRideByDriver() {
+            if(confirm("Kya aap yeh ride cancel karna chahte hain?")) {
+                localStorage.removeItem('active_ride');
+                renderDriverFeed();
+                alert("Ride reset successfully.");
+            }
+        }
+
         function checkCustomerStatus() {
             const rideData = localStorage.getItem('active_ride');
-            if(!rideData) return;
+            if(!rideData) {
+                document.getElementById('customerStatusCard').classList.add('hidden');
+                return;
+            }
 
             const ride = JSON.parse(rideData);
             const statusCard = document.getElementById('customerStatusCard');
             const contactDiv = document.getElementById('customerDriverContact');
 
+            statusCard.classList.remove('hidden');
+
             if(ride.status === 'Accepted') {
-                statusCard.classList.remove('hidden');
                 document.getElementById('statusTitle').innerText = "Auto Confirmed! 🛺";
                 document.getElementById('statusDesc').innerText = `Driver is on the way to pickup. Drop: ${ride.drop}`;
                 
@@ -462,6 +527,10 @@
                     <p class="info-text" style="margin-top: 6px;"><strong>Driver Phone:</strong> ${ride.acceptedBy}</p>
                     <a href="tel:${ride.acceptedBy}" class="btn-action">📞 Call Driver Now</a>
                 `;
+            } else {
+                document.getElementById('statusTitle').innerText = "Finding Nearby Auto...";
+                document.getElementById('statusDesc').innerText = `Drop: ${ride.drop} | Fare: ₹${ride.fare} (0% Commission).`;
+                contactDiv.classList.add('hidden');
             }
         }
     </script>
