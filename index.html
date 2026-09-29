@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yatri Auto - Secure Role Selection</title>
+    <title>Yatri Auto - Driver Login & Pass System</title>
     <style>
         :root {
             --primary: #f59e0b;
@@ -234,15 +234,50 @@
             <div id="roleSelectView">
                 <p style="text-align: center; font-size: 14px; color: var(--gray); margin-bottom: 20px;">Aap app ko kis tarah use karna chahte hain?</p>
                 
-                <div class="role-card-select" onclick="selectRole('customer')">
+                <div class="role-card-select" onclick="chooseRole('customer')">
                     <h3>👤 I am a Passenger</h3>
                     <p>Book an auto instantly with 0% commission.</p>
                 </div>
 
-                <div class="role-card-select" onclick="selectRole('driver')">
+                <div class="role-card-select" onclick="chooseRole('driver')">
                     <h3>🛺 I am a Driver Partner</h3>
-                    <p>Accept nearby rides & get direct live maps.</p>
+                    <p>Login, activate ₹30 daily pass & get direct rides.</p>
                 </div>
+            </div>
+
+            <!-- DRIVER LOGIN SCREEN -->
+            <div id="driverLoginView" class="hidden">
+                <div class="card" style="background: #f0fdf4; border-color: #bbf7d0;">
+                    <h3 style="font-size: 16px; color: #065f46; margin-bottom: 6px;">Driver Partner Registration</h3>
+                    <p class="info-text">Pehle apna profile details bhariye taaki aapko verified rides mil sakein.</p>
+                </div>
+                <div class="form-group">
+                    <label>Driver Full Name</label>
+                    <input type="text" id="dName" placeholder="e.g. Ramesh Kumar">
+                </div>
+                <div class="form-group">
+                    <label>Auto Number Plate</label>
+                    <input type="text" id="dAutoNo" placeholder="e.g. DL 1R 5432">
+                </div>
+                <div class="form-group">
+                    <label>Mobile Number</label>
+                    <input type="text" id="dPhone" placeholder="10-digit mobile number">
+                </div>
+                <button class="btn-primary" onclick="proceedToPass()">Next: Pay ₹30 Daily Pass</button>
+            </div>
+
+            <!-- DRIVER PASS PAYMENT SCREEN -->
+            <div id="driverPassView" class="hidden">
+                <div class="card" style="background: #fffbeb; border-color: #fde68a; text-align: center;">
+                    <h3 style="font-size: 18px; color: #b45309; margin-bottom: 6px;">🟢 ₹30 Unlimited Daily Pass</h3>
+                    <p class="info-text">0% Commission lene ke liye aaj ka pass active karein aur saari kamai seedhe apne paas rakhein.</p>
+                </div>
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 16px; text-align: center;">
+                    <p style="font-size: 14px; font-weight: bold; color: var(--dark);">Scan & Pay ₹30 via UPI</p>
+                    <div style="font-size: 40px; margin: 10px 0;">📱</div>
+                    <p style="font-size: 12px; color: var(--gray);">UPI ID: <strong>yatriauto@upi</strong></p>
+                </div>
+                <button class="btn-primary" style="background-color: #059669;" onclick="confirmPassPayment()">I Have Paid ₹30 (Activate Pass)</button>
             </div>
 
             <!-- CUSTOMER VIEW -->
@@ -274,15 +309,12 @@
                 </div>
             </div>
 
-            <!-- DRIVER VIEW -->
+            <!-- DRIVER FEED VIEW -->
             <div id="driverView" class="hidden">
                 <div class="badge">
-                    <span>🟢 ₹30 Daily Pass Active</span>
+                    <span id="passStatusBadge">🟢 ₹30 Daily Pass Active (Verified)</span>
                 </div>
-                <div class="form-group" style="margin-bottom: 12px;">
-                    <label>Driver Phone Number</label>
-                    <input type="text" id="driverPhone" value="9123456789">
-                </div>
+                <div id="driverProfileInfo" style="font-size: 13px; color: var(--gray); margin-bottom: 12px; background: #f9fafb; padding: 8px 12px; border-radius: 8px; border: 1px solid #e5e7eb;"></div>
 
                 <h3 style="font-size: 15px; margin-bottom: 10px; color: var(--dark);">Live Radar Requests</h3>
                 <div id="driverFeed">
@@ -300,48 +332,97 @@
         let dropLat = null;
         let dropLon = null;
 
-        // Check if role was already chosen in this session
         window.onload = function() {
             const savedRole = localStorage.getItem('yatri_role');
-            if(savedRole) {
-                selectRole(savedRole, false);
+            const driverData = localStorage.getItem('driver_profile');
+
+            if(savedRole === 'customer') {
+                showView('customer');
+            } else if(savedRole === 'driver') {
+                if(driverData) {
+                    showView('driver');
+                } else {
+                    showView('driverLogin');
+                }
             }
         }
 
-        function selectRole(role, save = true) {
-            if(save) {
-                localStorage.setItem('yatri_role', role);
+        function chooseRole(role) {
+            if(role === 'customer') {
+                localStorage.setItem('yatri_role', 'customer');
+                showView('customer');
+            } else {
+                localStorage.setItem('yatri_role', 'driver');
+                const driverData = localStorage.getItem('driver_profile');
+                if(driverData) {
+                    showView('driver');
+                } else {
+                    showView('driverLogin');
+                }
             }
+        }
 
-            const roleView = document.getElementById('roleSelectView');
-            const custView = document.getElementById('customerView');
-            const drivView = document.getElementById('driverView');
-            const logoutBtn = document.getElementById('logoutBtn');
+        function showView(viewName) {
+            document.getElementById('roleSelectView').classList.add('hidden');
+            document.getElementById('driverLoginView').classList.add('hidden');
+            document.getElementById('driverPassView').classList.add('hidden');
+            document.getElementById('customerView').classList.add('hidden');
+            document.getElementById('driverView').classList.add('hidden');
+            document.getElementById('logoutBtn').classList.remove('hidden');
+
             const headerSub = document.getElementById('headerSub');
 
-            roleView.classList.add('hidden');
-            logoutBtn.classList.remove('hidden');
-
-            if(role === 'customer') {
-                custView.classList.remove('hidden');
-                drivView.classList.add('hidden');
+            if(viewName === 'roleSelect') {
+                document.getElementById('roleSelectView').classList.remove('hidden');
+                document.getElementById('logoutBtn').classList.add('hidden');
+                headerSub.innerText = "Zero Commission • Dual GPS Navigation";
+            } else if(viewName === 'driverLogin') {
+                document.getElementById('driverLoginView').classList.remove('hidden');
+                headerSub.innerText = "Driver Partner Verification";
+            } else if(viewName === 'driverPass') {
+                document.getElementById('driverPassView').classList.remove('hidden');
+                headerSub.innerText = "Daily Pass Payment";
+            } else if(viewName === 'customer') {
+                document.getElementById('customerView').classList.remove('hidden');
                 headerSub.innerText = "Passenger Booking Panel";
                 checkCustomerStatus();
-            } else {
-                custView.classList.add('hidden');
-                drivView.classList.remove('hidden');
-                headerSub.innerText = "Driver Partner Radar";
+            } else if(viewName === 'driver') {
+                document.getElementById('driverView').classList.remove('hidden');
+                headerSub.innerText = "Driver Radar Feed";
+                const d = JSON.parse(localStorage.getItem('driver_profile') || '{}');
+                document.getElementById('driverProfileInfo').innerHTML = `Driver: <strong>${d.name || 'N/A'}</strong> | Auto: <strong>${d.autoNo || 'N/A'}</strong> | Ph: <strong>${d.phone || 'N/A'}</strong>`;
                 renderDriverFeed();
             }
         }
 
+        function proceedToPass() {
+            const name = document.getElementById('dName').value;
+            const autoNo = document.getElementById('dAutoNo').value;
+            const phone = document.getElementById('dPhone').value;
+
+            if(!name || !autoNo || !phone) {
+                alert("Kripya apne sabhi details (Name, Auto Number, Phone) bhariye.");
+                return;
+            }
+
+            const tempProfile = { name, autoNo, phone };
+            localStorage.setItem('temp_driver', JSON.stringify(tempProfile));
+            showView('driverPass');
+        }
+
+        function confirmPassPayment() {
+            const tempProfile = localStorage.getItem('temp_driver');
+            if(tempProfile) {
+                localStorage.setItem('driver_profile', tempProfile);
+                localStorage.removeItem('temp_driver');
+            }
+            alert("Payment successful! Aapka ₹30 Daily Pass activate ho gaya hai.");
+            showView('driver');
+        }
+
         function logoutApp() {
             localStorage.removeItem('yatri_role');
-            document.getElementById('roleSelectView').classList.remove('hidden');
-            document.getElementById('customerView').classList.add('hidden');
-            document.getElementById('driverView').classList.add('hidden');
-            document.getElementById('logoutBtn').classList.add('hidden');
-            document.getElementById('headerSub').innerText = "Zero Commission • Dual GPS Navigation";
+            showView('roleSelect');
         }
 
         function getPickupGPS() {
@@ -451,6 +532,8 @@
                 mapsButtonsHtml += `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ride.drop)}" target="_blank" class="btn-action btn-drop-maps">🏁 2. Drop: ${ride.drop}</a>`;
             }
 
+            const driverProfile = JSON.parse(localStorage.getItem('driver_profile') || '{}');
+
             if(ride.status === 'Accepted') {
                 feed.innerHTML = `
                     <div class="ride-card">
@@ -481,7 +564,7 @@
 
         function acceptRide() {
             let ride = JSON.parse(localStorage.getItem('active_ride'));
-            const driverPhone = document.getElementById('driverPhone').value;
+            const driverProfile = JSON.parse(localStorage.getItem('driver_profile') || '{}');
 
             if(ride.status === 'Accepted') {
                 alert("Yeh ride pehle hi accept ho chuki hai!");
@@ -490,7 +573,7 @@
             }
 
             ride.status = 'Accepted';
-            ride.acceptedBy = driverPhone;
+            ride.acceptedBy = `${driverProfile.name} (${driverProfile.phone})` ;
             localStorage.setItem('active_ride', JSON.stringify(ride));
 
             alert("Ride successfully locked for you!");
@@ -524,7 +607,7 @@
                 
                 contactDiv.classList.remove('hidden');
                 contactDiv.innerHTML = `
-                    <p class="info-text" style="margin-top: 6px;"><strong>Driver Phone:</strong> ${ride.acceptedBy}</p>
+                    <p class="info-text" style="margin-top: 6px;"><strong>Driver Details:</strong> ${ride.acceptedBy}</p>
                     <a href="tel:${ride.acceptedBy}" class="btn-action">📞 Call Driver Now</a>
                 `;
             } else {
