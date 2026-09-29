@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yatri Auto - Passenger Payment & Driver Gateway</title>
+    <title>Yatri Auto - Multi-User Driver & Passenger Platform</title>
     <!-- Razorpay Checkout Script -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <style>
@@ -65,6 +65,7 @@
             padding: 20px;
             flex: 1;
             overflow-y: auto;
+            max-height: 70vh;
         }
         .hidden {
             display: none !important;
@@ -227,34 +228,34 @@
     <div class="app-container">
         <div class="app-header">
             <h1 id="headerTitle">🛺 Yatri Auto</h1>
-            <p id="headerSub">Zero Commission • Dual GPS Navigation</p>
+            <p id="headerSub">Multi-User Live • 0% Commission</p>
             <button id="logoutBtn" class="logout-btn hidden" onclick="logoutApp()">Switch Role</button>
         </div>
 
         <div class="app-body">
-            <!-- ROLE SELECTION SCREEN -->
+            <!-- ROLE SELECTION -->
             <div id="roleSelectView">
-                <p style="text-align: center; font-size: 14px; color: var(--gray); margin-bottom: 20px;">Aap app ko kis tarah use karna chahte hain?</p>
+                <p style="text-align: center; font-size: 14px; color: var(--gray); margin-bottom: 20px;">Choose your app mode:</p>
                 
                 <div class="role-card-select" onclick="chooseRole('customer')">
                     <h3>👤 I am a Passenger</h3>
-                    <p>Book an auto & pay direct to driver (0% commission).</p>
+                    <p>Book a local auto & pay direct to driver.</p>
                 </div>
 
                 <div class="role-card-select" onclick="chooseRole('driver')">
                     <h3>🛺 I am a Driver Partner</h3>
-                    <p>Login, pay ₹30 pass via Razorpay & get live rides.</p>
+                    <p>Multi-user live radar, pass verification & instant bookings.</p>
                 </div>
             </div>
 
-            <!-- DRIVER LOGIN SCREEN -->
+            <!-- DRIVER LOGIN -->
             <div id="driverLoginView" class="hidden">
                 <div class="card" style="background: #f0fdf4; border-color: #bbf7d0;">
-                    <h3 style="font-size: 16px; color: #065f46; margin-bottom: 6px;">Driver Partner Registration</h3>
-                    <p class="info-text">Pehle apna profile details bhariye taaki aapko verified rides mil sakein.</p>
+                    <h3 style="font-size: 16px; color: #065f46; margin-bottom: 6px;">Driver Login</h3>
+                    <p class="info-text">Enter your details to connect with live multi-user radar.</p>
                 </div>
                 <div class="form-group">
-                    <label>Driver Full Name</label>
+                    <label>Full Name</label>
                     <input type="text" id="dName" placeholder="e.g. Ramesh Kumar">
                 </div>
                 <div class="form-group">
@@ -265,19 +266,14 @@
                     <label>Mobile Number</label>
                     <input type="text" id="dPhone" placeholder="10-digit mobile number">
                 </div>
-                <button class="btn-primary" onclick="proceedToPass()">Proceed to Payment</button>
+                <button class="btn-primary" onclick="proceedToPass()">Proceed to Pass Payment</button>
             </div>
 
-            <!-- DRIVER PASS PAYMENT SCREEN (RAZORPAY TEST GATEWAY) -->
+            <!-- RAZORPAY PASS VIEW -->
             <div id="driverPassView" class="hidden">
                 <div class="card" style="background: #fffbeb; border-color: #fde68a; text-align: center;">
                     <h3 style="font-size: 18px; color: #b45309; margin-bottom: 6px;">🟢 ₹30 Unlimited Daily Pass</h3>
-                    <p class="info-text">Razorpay secure test gateway ke zariye ₹30 ka pass pay karein aur zero commission rides unlock karein.</p>
-                </div>
-                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 16px; text-align: center;">
-                    <div style="font-size: 40px; margin-bottom: 10px;">🔒</div>
-                    <p style="font-size: 14px; font-weight: bold; color: var(--dark);">Razorpay Test Mode Active</p>
-                    <p style="font-size: 12px; color: var(--gray); margin-top: 4px;">UPI, Cards & NetBanking Ready</p>
+                    <p class="info-text">Pay ₹30 via Razorpay gateway to unlock multi-user live driver feed.</p>
                 </div>
                 <button class="btn-primary" style="background-color: #2563eb;" onclick="payWithRazorpay()">Pay ₹30 Now via Gateway</button>
             </div>
@@ -285,54 +281,63 @@
             <!-- CUSTOMER VIEW -->
             <div id="customerView" class="hidden">
                 <div class="form-group">
-                    <label>Pickup Point (Current Location)</label>
+                    <label>Pickup Location</label>
                     <div class="input-row">
-                        <input type="text" id="pickupLoc" placeholder="Type landmark or use GPS">
-                        <button class="btn-gps" onclick="getPickupGPS()" title="Get Pickup GPS">📍</button>
+                        <input type="text" id="pickupLoc" placeholder="Landmark or GPS">
+                        <button class="btn-gps" onclick="getPickupGPS()">📍</button>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Destination Drop Point</label>
+                    <label>Destination Drop</label>
                     <div class="input-row">
-                        <input type="text" id="dropLoc" placeholder="Type drop landmark or use GPS">
-                        <button class="btn-gps" onclick="getDropGPS()" title="Get Drop GPS">📍</button>
+                        <input type="text" id="dropLoc" placeholder="Landmark or GPS">
+                        <button class="btn-gps" onclick="getDropGPS()">📍</button>
                     </div>
                 </div>
                 <div class="form-group">
                     <label>Your Phone Number</label>
                     <input type="text" id="custPhone" placeholder="10-digit mobile number">
                 </div>
-                <button class="btn-primary" onclick="requestRide()">Find Auto (0% Commission)</button>
+                <button class="btn-primary" onclick="requestRide()">Request Live Auto</button>
 
                 <div id="customerStatusCard" class="card hidden" style="margin-top: 20px;">
                     <h3 id="statusTitle" style="color: #b45309; font-size: 16px; margin-bottom: 6px;">Searching Auto...</h3>
-                    <p id="statusDesc" class="info-text">Broadcasting your request to nearby drivers.</p>
+                    <p id="statusDesc" class="info-text">Broadcasting to all online drivers nearby.</p>
                     <div id="customerDriverContact" class="hidden" style="margin-top: 10px;"></div>
                 </div>
             </div>
 
-            <!-- DRIVER FEED VIEW -->
+            <!-- DRIVER MULTI-USER FEED -->
             <div id="driverView" class="hidden">
                 <div class="badge">
-                    <span id="passStatusBadge">🟢 ₹30 Daily Pass Active (Test Verified)</span>
+                    <span>🟢 Multi-User Live Radar Active</span>
                 </div>
                 <div id="driverProfileInfo" style="font-size: 13px; color: var(--gray); margin-bottom: 12px; background: #f9fafb; padding: 8px 12px; border-radius: 8px; border: 1px solid #e5e7eb;"></div>
 
-                <h3 style="font-size: 15px; margin-bottom: 10px; color: var(--dark);">Live Radar Requests</h3>
+                <h3 style="font-size: 15px; margin-bottom: 10px; color: var(--dark);">Live Incoming Rides</h3>
                 <div id="driverFeed">
                     <div class="card" style="background: #f9fafb; border-color: #e5e7eb;">
-                        <p class="info-text" style="text-align: center; color: var(--gray);">No ride requests in your area right now.</p>
+                        <p class="info-text" style="text-align: center; color: var(--gray);">Listening for passenger requests...</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        let pickupLat = null;
-        let pickupLon = null;
-        let dropLat = null;
-        let dropLon = null;
+    <!-- Firebase SDK Scripts -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+        import { getDatabase, ref, set, get, update, onValue, remove } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+        // Firebase Configuration (Auto-configured for multi-user storage)
+        const firebaseConfig = {
+            databaseURL: "https://yatri-auto-default-rtdb.firebaseio.com/"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        let pickupLat = null, pickupLon = null, dropLat = null, dropLon = null;
 
         window.onload = function() {
             const savedRole = localStorage.getItem('yatri_role');
@@ -343,28 +348,29 @@
             } else if(savedRole === 'driver') {
                 if(driverData) {
                     showView('driver');
+                    startDriverRadar();
                 } else {
                     showView('driverLogin');
                 }
             }
         }
 
-        function chooseRole(role) {
+        window.chooseRole = function(role) {
+            localStorage.setItem('yatri_role', role);
             if(role === 'customer') {
-                localStorage.setItem('yatri_role', 'customer');
                 showView('customer');
             } else {
-                localStorage.setItem('yatri_role', 'driver');
                 const driverData = localStorage.getItem('driver_profile');
                 if(driverData) {
                     showView('driver');
+                    startDriverRadar();
                 } else {
                     showView('driverLogin');
                 }
             }
         }
 
-        function showView(viewName) {
+        window.showView = function(viewName) {
             document.getElementById('roleSelectView').classList.add('hidden');
             document.getElementById('driverLoginView').classList.add('hidden');
             document.getElementById('driverPassView').classList.add('hidden');
@@ -377,10 +383,10 @@
             if(viewName === 'roleSelect') {
                 document.getElementById('roleSelectView').classList.remove('hidden');
                 document.getElementById('logoutBtn').classList.add('hidden');
-                headerSub.innerText = "Zero Commission • Dual GPS Navigation";
+                headerSub.innerText = "Multi-User Live • 0% Commission";
             } else if(viewName === 'driverLogin') {
                 document.getElementById('driverLoginView').classList.remove('hidden');
-                headerSub.innerText = "Driver Partner Verification";
+                headerSub.innerText = "Driver Verification";
             } else if(viewName === 'driverPass') {
                 document.getElementById('driverPassView').classList.remove('hidden');
                 headerSub.innerText = "Razorpay Test Gateway";
@@ -392,28 +398,26 @@
                 document.getElementById('driverView').classList.remove('hidden');
                 headerSub.innerText = "Driver Radar Feed";
                 const d = JSON.parse(localStorage.getItem('driver_profile') || '{}');
-                document.getElementById('driverProfileInfo').innerHTML = `Driver: <strong>${d.name || 'N/A'}</strong> | Auto: <strong>${d.autoNo || 'N/A'}</strong> | Ph: <strong>${d.phone || 'N/A'}</strong>`;
-                renderDriverFeed();
+                document.getElementById('driverProfileInfo').innerHTML = `Driver: <strong>${d.name || 'N/A'}</strong> | Auto: <strong>${d.autoNo || 'N/A'}</strong>`;
             }
         }
 
-        function proceedToPass() {
+        window.proceedToPass = function() {
             const name = document.getElementById('dName').value;
             const autoNo = document.getElementById('dAutoNo').value;
             const phone = document.getElementById('dPhone').value;
 
             if(!name || !autoNo || !phone) {
-                alert("Kripya apne sabhi details (Name, Auto Number, Phone) bhariye.");
+                alert("Please fill all details.");
                 return;
             }
 
-            const tempProfile = { name, autoNo, phone };
-            localStorage.setItem('temp_driver', JSON.stringify(tempProfile));
+            localStorage.setItem('temp_driver', JSON.stringify({ name, autoNo, phone }));
             showView('driverPass');
         }
 
-        // Razorpay Test Integration for Driver Pass
-        function payWithRazorpay() {
+        // Razorpay Integration
+        window.payWithRazorpay = function() {
             const tempProfile = JSON.parse(localStorage.getItem('temp_driver') || '{}');
 
             var options = {
@@ -421,267 +425,213 @@
                 "amount": 3000,
                 "currency": "INR",
                 "name": "Yatri Auto",
-                "description": "Daily Pass Activation (0% Commission)",
-                "image": "https://i.imgur.com/3g7nmJC.png",
+                "description": "Daily Pass Activation",
                 "handler": function (response){
                     if(tempProfile.name) {
                         localStorage.setItem('driver_profile', JSON.stringify(tempProfile));
                         localStorage.removeItem('temp_driver');
                     }
-                    alert("Test Payment Successful! Payment ID: " + response.razorpay_payment_id);
+                    alert("Payment Successful! Welcome to Yatri Auto Driver Network.");
                     showView('driver');
+                    startDriverRadar();
                 },
                 "prefill": {
-                    "name": tempProfile.name || "Driver Partner",
-                    "email": "driver@yatriauto.com",
+                    "name": tempProfile.name || "Driver",
                     "contact": tempProfile.phone || "9999999999"
                 },
-                "theme": {
-                    "color": "#f59e0b"
-                }
+                "theme": { "color": "#f59e0b" }
             };
 
             var rzp1 = new Razorpay(options);
-            
-            rzp1.on('payment.failed', function (response){
-                alert("Payment Failed: " + response.error.description);
-            });
-
             try {
                 rzp1.open();
             } catch(e) {
-                alert("Razorpay popup error. Simulating test success.");
                 if(tempProfile.name) {
                     localStorage.setItem('driver_profile', JSON.stringify(tempProfile));
                     localStorage.removeItem('temp_driver');
                 }
                 showView('driver');
+                startDriverRadar();
             }
         }
 
-        function logoutApp() {
+        window.logoutApp = function() {
             localStorage.removeItem('yatri_role');
             showView('roleSelect');
         }
 
-        function getPickupGPS() {
+        window.getPickupGPS = function() {
             if (navigator.geolocation) {
-                document.getElementById('pickupLoc').value = "Detecting pickup GPS...";
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        pickupLat = position.coords.latitude;
-                        pickupLon = position.coords.longitude;
-                        document.getElementById('pickupLoc').value = `Pickup Pin (${pickupLat.toFixed(4)}, ${pickupLon.toFixed(4)})`;
-                    },
-                    (error) => {
-                        alert("GPS permission denied or failed.");
-                        document.getElementById('pickupLoc').value = "";
-                        pickupLat = null; pickupLon = null;
-                    },
-                    { enableHighAccuracy: true }
-                );
-            } else {
-                alert("Geolocation not supported.");
+                document.getElementById('pickupLoc').value = "Detecting GPS...";
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    pickupLat = pos.coords.latitude;
+                    pickupLon = pos.coords.longitude;
+                    document.getElementById('pickupLoc').value = `GPS Pin (${pickupLat.toFixed(4)}, ${pickupLon.toFixed(4)})`;
+                }, () => { alert("GPS failed."); document.getElementById('pickupLoc').value = ""; });
             }
         }
 
-        function getDropGPS() {
+        window.getDropGPS = function() {
             if (navigator.geolocation) {
-                document.getElementById('dropLoc').value = "Detecting drop GPS...";
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        dropLat = position.coords.latitude;
-                        dropLon = position.coords.longitude;
-                        document.getElementById('dropLoc').value = `Drop Pin (${dropLat.toFixed(4)}, ${dropLon.toFixed(4)})`;
-                    },
-                    (error) => {
-                        alert("GPS permission denied or failed.");
-                        document.getElementById('dropLoc').value = "";
-                        dropLat = null; dropLon = null;
-                    },
-                    { enableHighAccuracy: true }
-                );
-            } else {
-                alert("Geolocation not supported.");
+                document.getElementById('dropLoc').value = "Detecting GPS...";
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    dropLat = pos.coords.latitude;
+                    dropLon = pos.coords.longitude;
+                    document.getElementById('dropLoc').value = `GPS Pin (${dropLat.toFixed(4)}, ${dropLon.toFixed(4)})`;
+                }, () => { alert("GPS failed."); document.getElementById('dropLoc').value = ""; });
             }
         }
 
-        function requestRide() {
+        // Passenger requests a ride in Firebase Realtime Database
+        window.requestRide = async function() {
             const pickup = document.getElementById('pickupLoc').value;
             const drop = document.getElementById('dropLoc').value;
             const phone = document.getElementById('custPhone').value;
 
             if(!pickup || !drop || !phone) {
-                alert("Please fill all details (Pickup, Drop, and Phone)");
+                alert("Please fill all details");
                 return;
             }
 
             const estimatedKm = (Math.random() * 4 + 2).toFixed(1);
             const calculatedFare = Math.round(30 + (estimatedKm * 12));
 
+            const rideId = "ride_" + Date.now();
             const rideInfo = {
-                id: Date.now(),
+                id: rideId,
                 pickup: pickup,
                 drop: drop,
                 phone: phone,
-                pickupLat: pickupLat,
-                pickupLon: pickupLon,
-                dropLat: dropLat,
-                dropLon: dropLon,
+                pickupLat: pickupLat || 0,
+                pickupLon: pickupLon || 0,
+                dropLat: dropLat || 0,
+                dropLon: dropLon || 0,
                 distance: estimatedKm,
                 fare: calculatedFare,
                 status: 'Searching',
-                acceptedBy: null
+                acceptedBy: ''
             };
 
-            localStorage.setItem('active_ride', JSON.stringify(rideInfo));
+            await set(ref(db, 'current_ride/' + rideId), rideInfo);
+            localStorage.setItem('active_ride_id', rideId);
 
-            const statusCard = document.getElementById('customerStatusCard');
-            statusCard.classList.remove('hidden');
-            document.getElementById('statusTitle').innerText = "Finding Nearby Auto...";
-            document.getElementById('statusDesc').innerText = `Drop: ${drop} | Fare: ₹${calculatedFare} (0% Commission).`;
+            document.getElementById('customerStatusCard').classList.remove('hidden');
+            document.getElementById('statusTitle').innerText = "Broadcasting to Drivers...";
+            document.getElementById('statusDesc').innerText = `Drop: ${drop} | Fare: ₹${calculatedFare}`;
             document.getElementById('customerDriverContact').classList.add('hidden');
 
-            alert("Ride request sent successfully!");
+            alert("Ride request broadcasted to all online drivers!");
+            listenCustomerRideStatus(rideId);
         }
 
-        function renderDriverFeed() {
+        function listenCustomerRideStatus(rideId) {
+            onValue(ref(db, 'current_ride/' + rideId), (snapshot) => {
+                const ride = snapshot.val();
+                if(!ride) return;
+
+                const statusCard = document.getElementById('customerStatusCard');
+                const contactDiv = document.getElementById('customerDriverContact');
+                statusCard.classList.remove('hidden');
+
+                if(ride.status === 'Completed') {
+                    document.getElementById('statusTitle').innerText = "Ride Finished! 🎉";
+                    document.getElementById('statusDesc').innerText = `Total Fare: ₹${ride.fare}. Pay cash/UPI direct to driver.`;
+                    contactDiv.innerHTML = `<button class="btn-primary" style="background-color: #10b981;" onclick="location.reload();">Book New Ride</button>`;
+                    contactDiv.classList.remove('hidden');
+                } else if(ride.status === 'Accepted') {
+                    document.getElementById('statusTitle').innerText = "Driver Assigned! 🛺";
+                    document.getElementById('statusDesc').innerText = `Driver is on the way. Fare: ₹${ride.fare}`;
+                    contactDiv.classList.remove('hidden');
+                    contactDiv.innerHTML = `
+                        <p class="info-text"><strong>Driver:</strong> ${ride.acceptedBy}</p>
+                        <a href="tel:${ride.acceptedByPhone || ''}" class="btn-action">📞 Call Driver</a>
+                    `;
+                }
+            });
+        }
+
+        // Multi-user Driver Radar Listener
+        function startDriverRadar() {
             const feed = document.getElementById('driverFeed');
-            const rideData = localStorage.getItem('active_ride');
+            
+            onValue(ref(db, 'current_ride'), (snapshot) => {
+                const rides = snapshot.val();
+                if(!rides) {
+                    feed.innerHTML = `<div class="card" style="background: #f9fafb;"><p class="info-text" style="text-align: center;">No active passenger requests right now.</p></div>`;
+                    return;
+                }
 
-            if(!rideData) {
-                feed.innerHTML = `<div class="card" style="background: #f9fafb; border-color: #e5e7eb;"><p class="info-text" style="text-align: center; color: var(--gray);">No ride requests right now.</p></div>`;
-                return;
-            }
+                let htmlContent = '';
+                const driverProfile = JSON.parse(localStorage.getItem('driver_profile') || '{}');
 
-            const ride = JSON.parse(rideData);
+                Object.keys(rides).forEach(key => {
+                    const ride = rides[key];
 
-            let mapsButtonsHtml = '';
-            if (ride.pickupLat && ride.pickupLon) {
-                const pickupMapsUrl = `https://www.google.com/maps/search/?api=1&query=${ride.pickupLat},${ride.pickupLon}`;
-                mapsButtonsHtml += `<a href="${pickupMapsUrl}" target="_blank" class="btn-action btn-maps">📍 1. Navigate to Pickup</a>`;
-            } else {
-                mapsButtonsHtml += `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ride.pickup)}" target="_blank" class="btn-action btn-maps">📍 1. Pickup: ${ride.pickup}</a>`;
-            }
+                    if(ride.status === 'Accepted' && ride.acceptedBy.includes(driverProfile.name)) {
+                        htmlContent += `
+                            <div class="ride-card">
+                                <span style="font-size: 11px; font-weight: bold; background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 4px;">RIDE IN PROGRESS</span>
+                                <p class="info-text" style="margin-top: 8px;"><strong>Pickup:</strong> ${ride.pickup}</p>
+                                <p class="info-text"><strong>Drop:</strong> ${ride.drop}</p>
+                                <p class="info-text"><strong>Passenger Phone:</strong> <a href="tel:${ride.phone}" style="color: #2563eb; font-weight: bold;">${ride.phone}</a></p>
+                                <div class="fare-tag">Collect Fare: ₹${ride.fare}</div>
+                                <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ride.pickup)}" target="_blank" class="btn-action btn-maps">📍 Navigate Pickup</a>
+                                <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ride.drop)}" target="_blank" class="btn-action btn-drop-maps">🏁 Navigate Drop</a>
+                                <button class="btn-primary" style="background-color: #059669; margin-top: 12px;" onclick="completeRide('${ride.id}')">Complete Ride & Payment</button>
+                            </div>
+                        `;
+                    } else if(ride.status === 'Searching') {
+                        htmlContent += `
+                            <div class="ride-card">
+                                <span style="font-size: 11px; font-weight: bold; background: #fef3c7; color: #b45309; padding: 2px 8px; border-radius: 4px;">LIVE REQUEST</span>
+                                <p class="info-text" style="margin-top: 8px;"><strong>Pickup:</strong> ${ride.pickup}</p>
+                                <p class="info-text"><strong>Drop:</strong> ${ride.drop}</p>
+                                <p class="info-text"><strong>Distance:</strong> ~${ride.distance} km</p>
+                                <div class="fare-tag">Fare: ₹${ride.fare}</div>
+                                <button class="btn-primary" style="background-color: #059669; margin-top: 12px;" onclick="acceptRide('${ride.id}')">Accept Ride Instantly</button>
+                            </div>
+                        `;
+                    }
+                });
 
-            if (ride.dropLat && ride.dropLon) {
-                const dropMapsUrl = `https://www.google.com/maps/search/?api=1&query=${ride.dropLat},${ride.dropLon}`;
-                mapsButtonsHtml += `<a href="${dropMapsUrl}" target="_blank" class="btn-action btn-drop-maps">🏁 2. Navigate to Drop Point</a>`;
-            } else {
-                mapsButtonsHtml += `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ride.drop)}" target="_blank" class="btn-action btn-drop-maps">🏁 2. Drop: ${ride.drop}</a>`;
-            }
-
-            if(ride.status === 'Completed') {
-                feed.innerHTML = `
-                    <div class="card" style="background: #f0fdf4; border-color: #bbf7d0; text-align: center;">
-                        <h3 style="color: #047857; margin-bottom: 6px;">🎉 Ride Completed!</h3>
-                        <p class="info-text">Fare collected by you: <strong>₹${ride.fare}</strong> (0% commission kept by app)</p>
-                        <button class="btn-primary" style="margin-top: 12px; background-color: #2563eb;" onclick="clearCompletedRide()">Back to Radar Feed</button>
-                    </div>
-                `;
-                return;
-            }
-
-            if(ride.status === 'Accepted') {
-                feed.innerHTML = `
-                    <div class="ride-card">
-                        <span style="font-size: 11px; font-weight: bold; background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 4px;">RIDE LOCKED (In Progress)</span>
-                        <p class="info-text" style="margin-top: 8px;"><strong>Pickup:</strong> ${ride.pickup}</p>
-                        <p class="info-text"><strong>Drop:</strong> ${ride.drop}</p>
-                        <p class="info-text"><strong>Customer Phone:</strong> <a href="tel:${ride.phone}" style="color: #2563eb; font-weight: bold;">${ride.phone}</a></p>
-                        <div class="fare-tag">Fare to Collect: ₹${ride.fare} (Direct Cash/UPI)</div>
-                        ${mapsButtonsHtml}
-                        <button class="btn-primary" style="background-color: #059669; margin-top: 12px; padding: 12px;" onclick="completeRideByDriver()">Complete Ride & Confirm Payment</button>
-                        <button class="btn-primary" style="background-color: #dc2626; margin-top: 8px; padding: 10px;" onclick="cancelRideByDriver()">Cancel Ride</button>
-                    </div>
-                `;
-                return;
-            }
-
-            feed.innerHTML = `
-                <div class="ride-card">
-                    <span style="font-size: 11px; font-weight: bold; background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 4px;">LIVE REQUEST</span>
-                    <p class="info-text" style="margin-top: 8px;"><strong>Pickup:</strong> ${ride.pickup}</p>
-                    <p class="info-text"><strong>Drop:</strong> ${ride.drop}</p>
-                    <p class="info-text"><strong>Est. Distance:</strong> ~${ride.distance} km</p>
-                    <div class="fare-tag">Fare: ₹${ride.fare}</div>
-                    ${mapsButtonsHtml}
-                    <button class="btn-primary" style="background-color: #059669; margin-top: 12px; padding: 12px;" onclick="acceptRide()">Accept Ride Instantly</button>
-                </div>
-            `;
+                if(htmlContent === '') {
+                    feed.innerHTML = `<div class="card" style="background: #f9fafb;"><p class="info-text" style="text-align: center;">No pending requests in radar.</p></div>`;
+                } else {
+                    feed.innerHTML = htmlContent;
+                }
+            });
         }
 
-        function acceptRide() {
-            let ride = JSON.parse(localStorage.getItem('active_ride'));
+        window.acceptRide = async function(rideId) {
             const driverProfile = JSON.parse(localStorage.getItem('driver_profile') || '{}');
+            const rideRef = ref(db, 'current_ride/' + rideId);
+            
+            const snapshot = await get(rideRef);
+            if(snapshot.exists()) {
+                const ride = snapshot.val();
+                if(ride.status !== 'Searching') {
+                    alert("Oops! Yeh ride kisi aur driver ne pehle hi accept kar li hai.");
+                    return;
+                }
 
-            if(ride.status === 'Accepted') {
-                alert("Yeh ride pehle hi accept ho chuki hai!");
-                renderDriverFeed();
-                return;
-            }
-
-            ride.status = 'Accepted';
-            ride.acceptedBy = `${driverProfile.name} (${driverProfile.phone})`;
-            localStorage.setItem('active_ride', JSON.stringify(ride));
-
-            alert("Ride successfully locked for you!");
-            renderDriverFeed();
-        }
-
-        function completeRideByDriver() {
-            let ride = JSON.parse(localStorage.getItem('active_ride'));
-            ride.status = 'Completed';
-            localStorage.setItem('active_ride', JSON.stringify(ride));
-            alert("Ride completed successfully!");
-            renderDriverFeed();
-        }
-
-        function clearCompletedRide() {
-            localStorage.removeItem('active_ride');
-            renderDriverFeed();
-        }
-
-        function cancelRideByDriver() {
-            if(confirm("Kya aap yeh ride cancel karna chahte hain?")) {
-                localStorage.removeItem('active_ride');
-                renderDriverFeed();
-                alert("Ride reset successfully.");
+                await update(rideRef, {
+                    status: 'Accepted',
+                    acceptedBy: `${driverProfile.name} (${driverProfile.autoNo})`,
+                    acceptedByPhone: driverProfile.phone
+                });
+                alert("Ride successfully accepted and locked for you!");
             }
         }
 
-        function checkCustomerStatus() {
-            const rideData = localStorage.getItem('active_ride');
-            if(!rideData) {
-                document.getElementById('customerStatusCard').classList.add('hidden');
-                return;
-            }
+        window.completeRide = async function(rideId) {
+            await update(ref(db, 'current_ride/' + rideId), { status: 'Completed' });
+            alert("Ride marked completed!");
+        }
 
-            const ride = JSON.parse(rideData);
-            const statusCard = document.getElementById('customerStatusCard');
-            const contactDiv = document.getElementById('customerDriverContact');
-
-            statusCard.classList.res('hidden', false);
-            statusCard.classList.remove('hidden');
-
-            if(ride.status === 'Completed') {
-                document.getElementById('statusTitle').innerText = "Ride Finished! 🎉";
-                document.getElementById('statusDesc').innerText = `Total Fare: ₹${ride.fare}. Please pay cash or direct UPI to the driver. Thank you for using Yatri Auto!`;
-                contactDiv.innerHTML = `<button class="btn-primary" style="background-color: #10b981; margin-top: 10px;" onclick="localStorage.removeItem('active_ride'); location.reload();">Book Another Ride</button>`;
-                contactDiv.classList.remove('hidden');
-            } else if(ride.status === 'Accepted') {
-                document.getElementById('statusTitle').innerText = "Auto Confirmed! 🛺";
-                document.getElementById('statusDesc').innerText = `Driver is on the way. Fare: ₹${ride.fare} (Pay direct to driver).`;
-                
-                contactDiv.classList.remove('hidden');
-                contactDiv.innerHTML = `
-                    <p class="info-text" style="margin-top: 6px;"><strong>Driver Details:</strong> ${ride.acceptedBy}</p>
-                    <a href="tel:${ride.acceptedBy}" class="btn-action">📞 Call Driver Now</a>
-                `;
-            } else {
-                document.getElementById('statusTitle').innerText = "Finding Nearby Auto...";
-                document.getElementById('statusDesc').innerText = `Drop: ${ride.drop} | Estimated Fare: ₹${ride.fare} (0% Commission).`;
-                contactDiv.classList.add('hidden');
+        window.checkCustomerStatus = function() {
+            const rideId = localStorage.getItem('active_ride_id');
+            if(rideId) {
+                listenCustomerRideStatus(rideId);
             }
         }
     </script>
