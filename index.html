@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yatri Auto - Razorpay Gateway Integration</title>
+    <title>Yatri Auto - Live Test Mode</title>
     <!-- Razorpay Checkout Script -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <style>
@@ -268,16 +268,16 @@
                 <button class="btn-primary" onclick="proceedToPass()">Proceed to Payment</button>
             </div>
 
-            <!-- DRIVER PASS PAYMENT SCREEN (RAZORPAY GATEWAY) -->
+            <!-- DRIVER PASS PAYMENT SCREEN (RAZORPAY TEST GATEWAY) -->
             <div id="driverPassView" class="hidden">
                 <div class="card" style="background: #fffbeb; border-color: #fde68a; text-align: center;">
                     <h3 style="font-size: 18px; color: #b45309; margin-bottom: 6px;">🟢 ₹30 Unlimited Daily Pass</h3>
-                    <p class="info-text">Razorpay secure payment gateway ke zariye ₹30 ka pass pay karein aur zero commission rides unlock karein.</p>
+                    <p class="info-text">Razorpay secure test gateway ke zariye ₹30 ka pass pay karein aur zero commission rides unlock karein.</p>
                 </div>
                 <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 16px; text-align: center;">
                     <div style="font-size: 40px; margin-bottom: 10px;">🔒</div>
-                    <p style="font-size: 14px; font-weight: bold; color: var(--dark);">Secured by Razorpay</p>
-                    <p style="font-size: 12px; color: var(--gray); margin-top: 4px;">UPI, Cards, NetBanking & Wallets Supported</p>
+                    <p style="font-size: 14px; font-weight: bold; color: var(--dark);">Razorpay Test Mode Active</p>
+                    <p style="font-size: 12px; color: var(--gray); margin-top: 4px;">UPI, Cards & NetBanking Ready</p>
                 </div>
                 <button class="btn-primary" style="background-color: #2563eb;" onclick="payWithRazorpay()">Pay ₹30 Now via Gateway</button>
             </div>
@@ -314,7 +314,7 @@
             <!-- DRIVER FEED VIEW -->
             <div id="driverView" class="hidden">
                 <div class="badge">
-                    <span id="passStatusBadge">🟢 ₹30 Daily Pass Active (Gateway Verified)</span>
+                    <span id="passStatusBadge">🟢 ₹30 Daily Pass Active (Test Verified)</span>
                 </div>
                 <div id="driverProfileInfo" style="font-size: 13px; color: var(--gray); margin-bottom: 12px; background: #f9fafb; padding: 8px 12px; border-radius: 8px; border: 1px solid #e5e7eb;"></div>
 
@@ -383,7 +383,7 @@
                 headerSub.innerText = "Driver Partner Verification";
             } else if(viewName === 'driverPass') {
                 document.getElementById('driverPassView').classList.remove('hidden');
-                headerSub.innerText = "Razorpay Gateway Payment";
+                headerSub.innerText = "Razorpay Test Gateway";
             } else if(viewName === 'customer') {
                 document.getElementById('customerView').classList.remove('hidden');
                 headerSub.innerText = "Passenger Booking Panel";
@@ -412,24 +412,23 @@
             showView('driverPass');
         }
 
-        // Razorpay Integration Function
+        // Razorpay Test Integration Function
         function payWithRazorpay() {
             const tempProfile = JSON.parse(localStorage.getItem('temp_driver') || '{}');
 
             var options = {
-                "key": "rzp_test_YourTestKeyHere", // Aapki Razorpay Test Key (abhi test mode mein chalega)
+                "key": "rzp_test_Thw95fS2j4I3UC", // Aapki Real Test Key
                 "amount": 3000, // 3000 paise = ₹30.00
                 "currency": "INR",
                 "name": "Yatri Auto",
                 "description": "Daily Pass Activation (0% Commission)",
                 "image": "https://i.imgur.com/3g7nmJC.png",
                 "handler": function (response){
-                    // Payment successful hone par yeh block chalega
                     if(tempProfile.name) {
                         localStorage.setItem('driver_profile', JSON.stringify(tempProfile));
                         localStorage.removeItem('temp_driver');
                     }
-                    alert("Payment Successful! Payment ID: " + response.razorpay_payment_id);
+                    alert("Test Payment Successful! Payment ID: " + response.razorpay_payment_id);
                     showView('driver');
                 },
                 "prefill": {
@@ -444,17 +443,14 @@
 
             var rzp1 = new Razorpay(options);
             
-            // Error handling agar popup block ho ya test key issue ho
             rzp1.on('payment.failed', function (response){
                 alert("Payment Failed: " + response.error.description);
             });
 
-            // Razorpay popup kholne ke liye
             try {
                 rzp1.open();
             } catch(e) {
-                // Agar internet/script mein koi issue ho toh fallback ke taur par direct pass activate kar dega test ke liye
-                alert("Razorpay popup opened (Test Mode). Success simulate ki ja rahi hai.");
+                alert("Razorpay popup error. Simulating test success.");
                 if(tempProfile.name) {
                     localStorage.setItem('driver_profile', JSON.stringify(tempProfile));
                     localStorage.removeItem('temp_driver');
